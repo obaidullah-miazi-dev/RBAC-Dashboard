@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -50,8 +51,8 @@ export default function LoginPage() {
       {/* Top Left Logo */}
       <div className="absolute top-6 left-8 flex items-center gap-2 z-10">
        <div className='flex items-center gap-2'>
-         <img src="/logo.png" alt="Obliq Logo Mark" className="h-8 w-auto object-contain" />
-         <img src="/logo-text.png" alt="Obliq Typography" className="h-6 w-auto object-contain" />
+         <Image src="/logo.png" alt="Obliq Logo Mark" width={32} height={32} className="h-8 w-auto object-contain" priority />
+         <Image src="/logo-text.png" alt="Obliq Typography" width={100} height={24} className="h-6 w-auto object-contain" priority />
        </div>
       </div>
 
@@ -152,24 +153,27 @@ export default function LoginPage() {
 
       {/* Right Panel - Decorative */}
       <div className="hidden lg:block lg:w-1/2 relative p-4">
-        <div className="w-full h-full rounded-[32px] overflow-hidden relative shadow-[0_0_40px_rgba(255,107,74,0.1)] bg-gradient-to-br from-[#FF9854] via-[#FF7543] to-[#E54D2B]">
+        <div className="w-full h-full rounded-[32px] overflow-hidden relative shadow-[0_0_40px_rgba(255,107,74,0.1)] bg-linear-to-br from-[#FF9854] via-[#FF7543] to-[#E54D2B]">
           {/* Background Vector Image */}
           <div className="absolute inset-0 z-0">
-            <img 
+            <Image 
               src="/vector.png" 
               alt="Decorative Background" 
-              className="w-full h-full object-cover opacity-80"
-              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              fill
+              className="object-cover opacity-80"
+              priority
             />
           </div>
 
           {/* Overflowing Dashboard Image */}
           <div className="absolute top-24 bottom-24 -right-1/4 left-16 z-10 flex items-center shadow-[-20px_20px_60px_-15px_rgba(0,0,0,0.3)]">
-            <img 
+            <Image
               src="/dashboard.png" 
-              alt="Dashboard Preview" 
+              alt="Dashboard Preview"
+              width={1000}
+              height={1000}
               className="w-auto h-auto min-w-[120%] object-cover object-left rounded-l-2xl border-y border-l border-white/20"
-              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              priority
             />
           </div>
         </div>
