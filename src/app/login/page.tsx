@@ -145,7 +145,18 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="text-center text-sm text-zinc-500 mt-8 font-medium">
+          {/* Credentials Helper for HR Login */}
+          <div className="mt-6 p-4 bg-orange-50/50 border border-orange-100 rounded-2xl text-center">
+            <p className="text-[13px] font-medium text-orange-800 mb-1">HR Login Helper</p>
+            <p className="text-[12px] text-orange-600">
+              Email: <span className="font-semibold select-all">admin@example.com</span>
+            </p>
+            <p className="text-[12px] text-orange-600">
+              Password: <span className="font-semibold select-all">password</span>
+            </p>
+          </div>
+
+          <p className="text-center text-sm text-zinc-500 mt-6 font-medium">
             Don&apos;t have an account? <a href="#" className="font-bold text-zinc-900 hover:text-[#FF6B4A] transition-colors">Sign up</a>
           </p>
         </div>
