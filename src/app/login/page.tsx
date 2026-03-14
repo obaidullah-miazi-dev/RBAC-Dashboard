@@ -147,7 +147,7 @@ export default function LoginPage() {
 
           {/* Credentials Helper for HR Login */}
           <div className="mt-6 p-4 bg-orange-50/50 border border-orange-100 rounded-2xl text-center">
-            <p className="text-[13px] font-medium text-orange-800 mb-1">HR Login Helper</p>
+            <p className="text-[13px] font-medium text-orange-800 mb-1">Login Credentials</p>
             <p className="text-[12px] text-orange-600">
               Email: <span className="font-semibold select-all">admin@example.com</span>
             </p>
