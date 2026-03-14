@@ -4,6 +4,12 @@ import { verifyToken } from '@/lib/auth/jwt';
 
 // Define the route permissions mapping (atoms)
 const routePermissions: Record<string, string[]> = {
+  '/dashboard/leads': ['read:leads'],
+  '/dashboard/tasks': ['read:tasks'],
+  '/dashboard/reports': ['read:reports'],
+  '/dashboard/audit-log': ['read:audit'],
+  '/dashboard/customer-portal': ['read:portal'],
+  '/dashboard/settings': ['read:settings'],
   '/dashboard': ['read:dashboard'],
   '/admin/users': ['read:users', 'write:users'],
 };

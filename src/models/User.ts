@@ -5,8 +5,8 @@ export interface IUser extends Document {
   passwordHash: string;
   name: string;
   role: string; // the name of the role template
-  permissions: string[]; // actual explicit active atoms for this user
-  isActive: boolean;
+  managerId?: mongoose.Types.ObjectId;
+  status: 'active' | 'suspended' | 'banned';
   refreshTokens: string[]; // allow multiple devices
   createdAt: Date;
   updatedAt: Date;
@@ -34,14 +34,14 @@ const UserSchema: Schema = new Schema(
       type: String, // references Role name
       required: true,
     },
-    permissions: [
-      {
-        type: String, // Individual atom e.g., 'read:users'
-      },
-    ],
-    isActive: {
-      type: Boolean,
-      default: true,
+    managerId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    status: {
+      type: String,
+      enum: ['active', 'suspended', 'banned'],
+      default: 'active',
     },
     refreshTokens: [
       {
@@ -53,9 +53,6 @@ const UserSchema: Schema = new Schema(
     timestamps: true,
   }
 );
-
-// We won't use .populate for role because the architecture says roles are just baseline templates.
-// The true source of authority is the `permissions` array, which contains the atoms.
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
 

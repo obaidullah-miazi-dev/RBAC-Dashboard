@@ -1,3 +1,7 @@
+import User from '@/models/User';
+import Role from '@/models/Role';
+import UserPermission from '@/models/UserPermission';
+
 /**
  * Evaluates whether an actor with a set of permissions can grant
  * a specific list of target permissions.
@@ -15,4 +19,31 @@ export function canGrant(actorPermissions: string[], requestedPermissions: strin
   
   // The actor must have EVERY permission they are trying to grant
   return requestedPermissions.every((perm) => actorPermissions.includes(perm));
+}
+
+/**
+ * Calculates the final active permission atoms for a user.
+ * Formula: (Role.basePermissions ∪ UserPermission.grantedPermissions) - UserPermission.revokedPermissions
+ */
+export async function resolveUserPermissions(userId: string): Promise<string[]> {
+  const user = await User.findById(userId).lean();
+  if (!user) return [];
+
+  const role = await Role.findOne({ name: user.role }).lean();
+  const basePermissions = role?.permissions || [];
+
+  const userPermsDoc = await UserPermission.findOne({ userId }).lean();
+  
+  const granted = userPermsDoc?.grantedPermissions || [];
+  const revoked = userPermsDoc?.revokedPermissions || [];
+
+  // Combine base and granted (using Set for uniqueness)
+  const combined = new Set([...basePermissions, ...granted]);
+
+  // Remove revoked permissions
+  for (const r of revoked) {
+    combined.delete(r);
+  }
+
+  return Array.from(combined);
 }

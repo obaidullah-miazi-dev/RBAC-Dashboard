@@ -11,7 +11,7 @@ export interface TokenPayload extends JWTPayload {
 }
 
 export async function signAccessToken(payload: Omit<TokenPayload, 'exp' | 'iat' | 'nbf'>) {
-  return await new SignJWT(payload as any)
+  return await new SignJWT(payload as Record<string, unknown>)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('15m') // 15 mins for AT
