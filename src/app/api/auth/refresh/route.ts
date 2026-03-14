@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db/mongoose';
 import User from '@/models/User';
 import { signAccessToken, signRefreshToken, verifyToken } from '@/lib/auth/jwt';
 import { cookies } from 'next/headers';
+import { resolveUserPermissions } from '@/lib/rbac';
 
-export async function POST(req: NextRequest) {
+export async function POST() {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('refreshToken')?.value;
@@ -22,23 +23,31 @@ export async function POST(req: NextRequest) {
     await connectToDatabase();
     // Validate RT exists in DB
     const user = await User.findById(payload.userId);
-    if (!user || !user.isActive || !user.refreshTokens.includes(token)) {
+    if (!user || user.status !== 'active' || !user.refreshTokens.includes(token)) {
       return NextResponse.json({ error: 'Refresh token revoked or user inactive' }, { status: 403 });
     }
 
+    const finalPermissions = await resolveUserPermissions(user._id.toString());
+
     // Refresh token rotation
-    const newRefreshToken = await signRefreshToken(user._id.toString(), user.permissions);
+    const newRefreshToken = await signRefreshToken(user._id.toString(), finalPermissions);
     const newAccessToken = await signAccessToken({
       userId: user._id.toString(),
       email: user.email,
       role: user.role,
-      permissions: user.permissions,
+      permissions: finalPermissions,
     });
 
-    // Remove old RT and push new one
-    user.refreshTokens = user.refreshTokens.filter((rt: string) => rt !== token);
-    user.refreshTokens.push(newRefreshToken);
-    await user.save();
+    // Remove old RT and push new one atomically to avoid VersionError
+    // MongoDB does not allow $pull and $push on the same path in a single update
+    await User.updateOne(
+      { _id: user._id },
+      { $pull: { refreshTokens: token } }
+    );
+    await User.updateOne(
+      { _id: user._id },
+      { $push: { refreshTokens: newRefreshToken } }
+    );
 
     cookieStore.set({
       name: 'refreshToken',
@@ -56,7 +65,7 @@ export async function POST(req: NextRequest) {
         id: user._id,
         email: user.email,
         name: user.name,
-        permissions: user.permissions,
+        permissions: finalPermissions,
         role: user.role
       }
     });
