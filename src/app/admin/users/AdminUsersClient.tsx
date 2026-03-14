@@ -135,8 +135,8 @@ export function AdminUsersClient({ initialUsers, allAtoms }: { initialUsers: Use
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-zinc-900">{u.name}</span>
                   <div className="flex space-x-2">
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-bold ${u.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                      {u.status}
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-bold ${(!u.status || u.status === 'active') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      {u.status || 'active'}
                     </span>
                     <span className="text-xs px-2.5 py-1 rounded-full font-bold bg-[#FF6B4A]/10 text-[#FF6B4A]">
                       {u.role}
