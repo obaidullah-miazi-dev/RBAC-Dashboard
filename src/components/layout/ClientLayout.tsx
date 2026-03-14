@@ -12,7 +12,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   return (
     <AuthProvider>
-      <div className="flex h-screen overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+      <div className="flex h-screen overflow-hidden bg-[#FAFBFF]">
         {!isAuthRoute && <Sidebar />}
         <main className="flex-1 overflow-y-auto">
           {children}
