@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, LayoutDashboard, Users, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, LogOut, Shield } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
 
 export function Sidebar() {
@@ -18,62 +18,99 @@ export function Sidebar() {
       label: 'Dashboard',
       href: '/dashboard',
       icon: LayoutDashboard,
-      // Minimal permission to see dashboard link
       requiredAtom: 'read:dashboard',
     },
     {
       label: 'User Management',
       href: '/admin/users',
       icon: Users,
-      // Must have read:users to even see the link in the sidebar
       requiredAtom: 'read:users',
+    },
+    {
+      label: 'Leads',
+      href: '/dashboard/leads',
+      icon: Users,
+      requiredAtom: 'read:leads',
+    },
+    {
+      label: 'Tasks',
+      href: '/dashboard/tasks',
+      icon: LayoutDashboard,
+      requiredAtom: 'read:tasks',
+    },
+    {
+      label: 'Reports',
+      href: '/dashboard/reports',
+      icon: LayoutDashboard,
+      requiredAtom: 'read:reports',
+    },
+    {
+      label: 'Audit Log',
+      href: '/dashboard/audit-log',
+      icon: Shield,
+      requiredAtom: 'read:audit',
+    },
+    {
+      label: 'Customer Portal',
+      href: '/dashboard/customer-portal',
+      icon: Users,
+      requiredAtom: 'read:portal',
+    },
+    {
+      label: 'Settings',
+      href: '/dashboard/settings',
+      icon: LayoutDashboard,
+      requiredAtom: 'read:settings',
     },
   ];
 
   return (
-    <aside className="w-64 bg-zinc-900 text-zinc-100 flex flex-col h-full border-r border-zinc-800">
-      <div className="h-16 flex items-center px-6 border-b border-zinc-800">
-        <Shield className="w-6 h-6 text-blue-500 mr-2" />
-        <span className="font-bold text-lg tracking-tight">RBAC System</span>
+    <aside className="w-64 bg-white text-zinc-900 flex flex-col h-full border-r border-zinc-100 shadow-sm shadow-zinc-200/40 relative z-20">
+      <div className="h-20 flex items-center px-6 border-b border-zinc-100 mt-2">
+        <div className="flex items-center gap-2">
+          <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+          <img src="/logo-text.png" alt="Obliq" className="h-6 object-contain" />
+        </div>
       </div>
       
-      <div className="p-4 border-b border-zinc-800">
-        <p className="text-sm font-medium text-white">{user.name}</p>
-        <p className="text-xs text-zinc-400 capitalize">{user.role}</p>
+      <div className="p-5 border-b border-zinc-100 bg-[#FAFBFF]/50">
+        <p className="text-sm font-bold text-zinc-900">{user.name}</p>
+        <p className="text-xs text-zinc-500 font-medium capitalize mt-0.5">{user.role}</p>
       </div>
 
-      <nav className="flex-1 py-4 px-3 space-y-1">
+      <nav className="flex-1 py-5 px-4 space-y-1.5 overflow-y-auto">
         {navItems.map((item) => {
-          // Dynamic conditional rendering based on permission atoms
           if (item.requiredAtom && !userPermissions.includes(item.requiredAtom)) {
-            return null; // Skip rendering if missing atom
+            return null;
           }
 
-          const isActive = pathname.startsWith(item.href);
+          const isActive = item.href === '/dashboard' 
+            ? pathname === '/dashboard' 
+            : pathname.startsWith(item.href);
 
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`flex items-center px-3.5 py-3 text-sm font-semibold rounded-xl transition-all ${
                 isActive
-                  ? 'bg-blue-600/10 text-blue-500'
-                  : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                  ? 'bg-[#FF6B4A]/10 text-[#FF6B4A]'
+                  : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
               }`}
             >
-              <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+              <item.icon className={`mr-3.5 h-5 w-5 shrink-0 transition-colors ${isActive ? 'text-[#FF6B4A]' : 'text-zinc-400'}`} />
               {item.label}
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-zinc-800">
+      <div className="p-5 border-t border-zinc-100">
         <button
           onClick={logout}
-          className="flex w-full items-center px-3 py-2 text-sm font-medium text-zinc-300 rounded-md hover:bg-zinc-800 hover:text-white transition-colors"
+          className="flex w-full items-center px-4 py-3 text-sm font-semibold text-zinc-600 rounded-xl hover:bg-zinc-50 hover:text-red-500 transition-colors group"
         >
-          <LogOut className="mr-3 h-5 w-5" />
+          <LogOut className="mr-3 h-5 w-5 shrink-0 text-zinc-400 group-hover:text-red-500 transition-colors" />
           Sign out
         </button>
       </div>
