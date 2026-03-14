@@ -7,6 +7,7 @@ import User from '@/models/User';
 import Role from '@/models/Role';
 import UserPermission from '@/models/UserPermission';
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const ALL_ATOMS = [
   'read:dashboard',
@@ -68,9 +69,13 @@ async function seed() {
     let existingUser = await User.findOne({ email: u.email });
     
     if (!existingUser) {
+      // Hash password before saving
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(u.passwordHash, salt);
+
       existingUser = await User.create({
         email: u.email,
-        passwordHash: u.passwordHash,
+        passwordHash: hashedPassword,
         name: u.name,
         role: u.role,
         status: u.status,

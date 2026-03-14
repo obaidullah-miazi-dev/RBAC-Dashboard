@@ -7,6 +7,8 @@ import { verifyToken } from '@/lib/auth/jwt';
 import { resolveUserPermissions } from '@/lib/rbac';
 import { cookies } from 'next/headers';
 
+import bcrypt from 'bcryptjs';
+
 const ROLE_HIERARCHY: Record<string, number> = {
   admin: 100,
   manager: 50,
@@ -61,12 +63,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'User with this email already exists' }, { status: 400 });
     }
 
-    // Note: To match the seeded testing bypass, we store the password in plain text.
-    // In production, bcrypt.hash() fits right here.
+    // Hash the password securely
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     const newUser = new User({
       name,
-      email,
-      passwordHash: password,
+      email: email.toLowerCase().trim(),
+      passwordHash: hashedPassword,
       role,
       status: status || 'active',
       managerId: actor.role === 'manager' ? actor._id : null,

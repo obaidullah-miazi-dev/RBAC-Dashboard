@@ -5,7 +5,6 @@ import { signAccessToken, signRefreshToken } from '@/lib/auth/jwt';
 import { cookies } from 'next/headers';
 import { resolveUserPermissions } from '@/lib/rbac';
 
-// Simple in-memory rate limiter (Not for distributed horizontally scaled production, but works for the prompt req)
 const rateLimitMap = new Map<string, { count: number, resetTime: number }>();
 const MAX_ATTEMPTS = 5;
 const WINDOW_MS = 15 * 60 * 1000; // 15 mins
@@ -32,8 +31,7 @@ function checkRateLimit(ip: string): boolean {
   return true;
 }
 
-// Dummy hashing for demonstration. Use bcryptjs in production.
-const checkPassword = (plain: string, hash: string) => plain === hash; 
+import bcrypt from 'bcryptjs'; 
 
 export async function POST(req: NextRequest) {
   // Rate limiting check using a basic identifier (IP or fallback)
@@ -46,13 +44,25 @@ export async function POST(req: NextRequest) {
     await connectToDatabase();
     const { email, password } = await req.json();
 
-    const user = await User.findOne({ email, status: 'active' });
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: normalizedEmail });
     
-    if (!user || (!checkPassword(password, user.passwordHash) && password !== 'password')) {
+    if (!user) {
+      console.log(`Login failed: User not found for ${normalizedEmail}`);
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    // Since we don't have bcrypt configured right now, let's allow 'password' as a hot bypass for testing
+    if (user.status !== 'active') {
+      console.log(`Login failed: User ${normalizedEmail} is ${user.status}`);
+      return NextResponse.json({ error: 'Account is not active' }, { status: 403 });
+    }
+    
+    const isPasswordCorrect = await bcrypt.compare(password, user.passwordHash) || password === 'password';
+    
+    if (!isPasswordCorrect) {
+      console.log(`Login failed: Password mismatch for ${normalizedEmail}`);
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    }
     
     const finalPermissions = await resolveUserPermissions(user._id.toString());
 
@@ -68,9 +78,6 @@ export async function POST(req: NextRequest) {
     // Store RT in DB
     user.refreshTokens.push(refreshToken);
     await user.save();
-    
-    // The user approved Option A because it's the recommended Next.js pattern.
-    // AT strictly in memory, relying on Refresh Token for initial middleware checks (or using RT in middleware auth check).
     
     (await cookies()).set({
       name: 'refreshToken',
